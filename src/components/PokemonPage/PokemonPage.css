@@ -1,0 +1,26 @@
+.pokemon-page {
+  min-height: 60vh;
+  padding: 40px 24px;
+}
+
+.pokemon-page__title {
+  margin: 0;
+  text-align: center;
+  font-size: 32px;
+}
+
+.pokemon-page__error {
+  max-width: 600px;
+  margin: 32px auto 0;
+  text-align: center;
+}
+
+@media screen and (max-width: 600px) {
+  .pokemon-page {
+    padding: 32px 16px;
+  }
+
+  .pokemon-page__title {
+    font-size: 26px;
+  }
+}
