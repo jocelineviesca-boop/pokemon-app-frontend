@@ -5,8 +5,9 @@ function PokemonCard({ pokemon }) {
     <article className="pokemon-card">
       <img
         className="pokemon-card__image"
-        src={pokemon.sprites.front_default}
+        src={pokemon.sprites.front_default || fallbackImage}
         alt={`Imagen de ${pokemon.name}`}
+        loading="lazy"
       />
 
       <h3 className="pokemon-card__name">
