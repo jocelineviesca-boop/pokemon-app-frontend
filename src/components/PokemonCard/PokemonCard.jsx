@@ -14,6 +14,16 @@ function PokemonCard({ pokemon }) {
         "--pokemon-color": primaryColor,
       }}
     >
+      <div className="pokemon-card__header">
+        <span className="pokemon-card__number">
+          #{String(pokemon.id).padStart(3, "0")}
+        </span>
+
+        <span className="pokemon-card__primary-type">
+          {primaryType}
+        </span>
+      </div>
+
       <img
         className="pokemon-card__image"
         src={pokemon.sprites.front_default}
