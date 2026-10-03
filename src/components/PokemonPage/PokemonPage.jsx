@@ -4,10 +4,13 @@ import SearchForm from "../SearchForm/SearchForm.jsx";
 import PokemonCard from "../PokemonCard/PokemonCard.jsx";
 import Preloader from "../Preloader/Preloader.jsx";
 import NothingFound from "../NothingFound/NothingFound.jsx";
+import PokemonCardList from "../PokemonCardList/PokemonCardList.jsx";
 
 function PokemonPage({
-  pokemon,
+   pokemon,
+  pokemonList,
   isLoading,
+  isListLoading,
   error,
   onSearch,
   searchTerm,
@@ -33,9 +36,15 @@ function PokemonPage({
 
       {error === "api-error" && (
         <p className="pokemon-page__error">
-          Ocurrió un problema al consultar PokéAPI. Intenta nuevamente.
+           Lo sentimos, algo ha salido mal durante la solicitud. Es posible que haya
+    un problema de conexión o que el servidor no funcione. Por favor,
+    inténtalo más tarde.
         </p>
       )}
+
+      {pokemonList.length > 0 && (
+  <PokemonCardList pokemonList={pokemonList} />
+)}
     </main>
   );
 }

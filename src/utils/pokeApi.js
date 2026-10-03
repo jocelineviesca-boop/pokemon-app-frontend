@@ -14,3 +14,27 @@ export function getPokemon(name) {
       return response.json();
     });
 }
+
+export function getPokemonList(limit = 9) {
+  return fetch(`${BASE_URL}/pokemon?limit=${limit}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("API_ERROR");
+      }
+
+      return response.json();
+    })
+    .then((data) => {
+      return Promise.all(
+        data.results.map((pokemon) =>
+          fetch(pokemon.url).then((response) => {
+            if (!response.ok) {
+              throw new Error("API_ERROR");
+            }
+
+            return response.json();
+          })
+        )
+      );
+    });
+}
