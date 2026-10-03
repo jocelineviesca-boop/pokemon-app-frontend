@@ -3,14 +3,26 @@ import "./PokemonCardList.css";
 
 import PokemonCard from "../PokemonCard/PokemonCard.jsx";
 
+import {
+  INITIAL_VISIBLE_COUNT,
+  POKEMON_INCREMENT,
+} from "../../utils/constants.js";
+
 function PokemonCardList({ pokemonList }) {
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [visibleCount, setVisibleCount] = useState(
+    INITIAL_VISIBLE_COUNT
+  );
 
   function handleShowMore() {
-    setVisibleCount((currentCount) => currentCount + 3);
+    setVisibleCount(
+      (currentCount) => currentCount + POKEMON_INCREMENT
+    );
   }
 
-  const visiblePokemon = pokemonList.slice(0, visibleCount);
+  const visiblePokemon = pokemonList.slice(
+    0,
+    visibleCount
+  );
 
   return (
     <section className="pokemon-card-list">

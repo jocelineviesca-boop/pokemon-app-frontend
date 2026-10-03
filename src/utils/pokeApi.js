@@ -1,7 +1,10 @@
-const BASE_URL = "https://pokeapi.co/api/v2";
+import {
+  POKE_API_BASE_URL,
+  INITIAL_POKEMON_LIMIT,
+} from "./constants.js";
 
 export function getPokemon(name) {
-  return fetch(`${BASE_URL}/pokemon/${name.toLowerCase()}`)
+  fetch(`${POKE_API_BASE_URL}/pokemon/${name.toLowerCase()}`)
     .then((response) => {
       if (response.status === 404) {
         throw new Error("NOT_FOUND");
@@ -15,7 +18,7 @@ export function getPokemon(name) {
     });
 }
 
-export function getPokemonList(limit = 9) {
+export function getPokemonList(limit = INITIAL_POKEMON_LIMIT) {
   return fetch(`${BASE_URL}/pokemon?limit=${limit}`)
     .then((response) => {
       if (!response.ok) {
