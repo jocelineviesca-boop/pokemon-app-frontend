@@ -2,23 +2,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 40px;
-  border-bottom: 1px solid #ddd;
+
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 32px;
 }
 
 .header__title {
   margin: 0;
+
   font-size: 32px;
+  font-weight: 900;
+
+  color: var(--color-primary);
+  letter-spacing: -0.03em;
 }
 
 @media screen and (max-width: 600px) {
   .header {
     flex-direction: column;
     gap: 16px;
-    padding: 20px;
+    padding: 20px 16px;
   }
 
   .header__title {
-    font-size: 26px;
+    font-size: 28px;
   }
 }
