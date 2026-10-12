@@ -1,11 +1,31 @@
 import "./PokemonCard.css";
+
 import { pokemonTypeColors } from "../../utils/pokemonTypes.js";
 
-function PokemonCard({ pokemon }) {
+function PokemonCard({
+  pokemon,
+  favorites,
+  onAddFavorite,
+  onRemoveFavorite,
+}) {
   const primaryType = pokemon.types[0].type.name;
 
   const primaryColor =
     pokemonTypeColors[primaryType] || "#ef5350";
+
+  const favoritePokemon = favorites.find(
+    (favorite) => favorite.pokemonId === pokemon.id
+  );
+
+  const isFavorite = Boolean(favoritePokemon);
+
+  function handleFavoriteClick() {
+    if (isFavorite) {
+      onRemoveFavorite(favoritePokemon.id);
+    } else {
+      onAddFavorite(pokemon);
+    }
+  }
 
   return (
     <article
@@ -31,9 +51,28 @@ function PokemonCard({ pokemon }) {
         loading="lazy"
       />
 
-      <h3 className="pokemon-card__name">
-        {pokemon.name}
-      </h3>
+      <div className="pokemon-card__name-row">
+        <h3 className="pokemon-card__name">
+          {pokemon.name}
+        </h3>
+
+        <button
+          className={`pokemon-card__favorite-button ${
+            isFavorite
+              ? "pokemon-card__favorite-button_active"
+              : ""
+          }`}
+          type="button"
+          onClick={handleFavoriteClick}
+          aria-label={
+            isFavorite
+              ? `Quitar ${pokemon.name} de favoritos`
+              : `Agregar ${pokemon.name} a favoritos`
+          }
+        >
+          {isFavorite ? "★" : "☆"}
+        </button>
+      </div>
 
       <p className="pokemon-card__info">
         Altura: {pokemon.height}
@@ -71,8 +110,13 @@ function PokemonCard({ pokemon }) {
             key={statInfo.stat.name}
           >
             <div className="pokemon-card__stat-header">
-              <span>{statInfo.stat.name}</span>
-              <span>{statInfo.base_stat}</span>
+              <span>
+                {statInfo.stat.name}
+              </span>
+
+              <span>
+                {statInfo.base_stat}
+              </span>
             </div>
 
             <div className="pokemon-card__stat-bar">

@@ -9,14 +9,19 @@ import {
   POKEMON_INCREMENT,
 } from "../../utils/constants.js";
 
-function PokemonCardList({ pokemonList }) {
-  const [visibleCount, setVisibleCount] = useState(
-    INITIAL_VISIBLE_COUNT
-  );
+function PokemonCardList({
+  pokemonList,
+  favorites,
+  onAddFavorite,
+  onRemoveFavorite,
+}) {
+  const [visibleCount, setVisibleCount] =
+    useState(INITIAL_VISIBLE_COUNT);
 
   function handleShowMore() {
     setVisibleCount(
-      (currentCount) => currentCount + POKEMON_INCREMENT
+      (currentCount) =>
+        currentCount + POKEMON_INCREMENT
     );
   }
 
@@ -36,6 +41,9 @@ function PokemonCardList({ pokemonList }) {
           <PokemonCard
             key={pokemon.id}
             pokemon={pokemon}
+            favorites={favorites}
+            onAddFavorite={onAddFavorite}
+            onRemoveFavorite={onRemoveFavorite}
           />
         ))}
       </div>
