@@ -9,7 +9,7 @@ function Main() {
         </h2>
 
         <p className="main__description">
-          Busca Pokémon y consulta información obtenida desde PokéAPI.
+          Busca un Pokémon y consulta su información obtenida desde PokéAPI.
         </p>
       </section>
     </main>

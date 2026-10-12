@@ -3,28 +3,35 @@ import { useState } from "react";
 
 function SearchForm({ onSearch, isLoading }) {
   const [query, setQuery] = useState("");
-  const [validationError, setValidationError] = useState("");
+  const [validationError, setValidationError] =
+    useState("");
 
   function handleChange(event) {
     setQuery(event.target.value);
   }
 
   function handleSubmit(event) {
-  event.preventDefault();
+    event.preventDefault();
 
-  const trimmedQuery = query.trim();
+    const trimmedQuery = query.trim();
 
-  if (!trimmedQuery) {
-    setValidationError("Escribe el nombre de un Pokémon");
-    return;
+    if (!trimmedQuery) {
+      setValidationError(
+        "Por favor, introduzca una palabra clave"
+      );
+      return;
+    }
+
+    setValidationError("");
+
+    onSearch(trimmedQuery);
   }
 
-  setValidationError("");
-  onSearch(trimmedQuery);
-}
-
   return (
-    <form className="search-form" onSubmit={handleSubmit}>
+    <form
+      className="search-form"
+      onSubmit={handleSubmit}
+    >
       <input
         className="search-form__input"
         type="text"
@@ -33,15 +40,19 @@ function SearchForm({ onSearch, isLoading }) {
         onChange={handleChange}
       />
 
-      <button className="search-form__button" type="submit">
-        Buscar
+      <button
+        className="search-form__button"
+        type="submit"
+        disabled={isLoading}
+      >
+        {isLoading ? "Buscando..." : "Buscar"}
       </button>
 
       {validationError && (
-  <span className="search-form__error">
-    {validationError}
-  </span>
-)}
+        <span className="search-form__error">
+          {validationError}
+        </span>
+      )}
     </form>
   );
 }

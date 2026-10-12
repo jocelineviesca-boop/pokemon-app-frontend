@@ -12,8 +12,11 @@ body {
   margin: 0;
   min-width: 320px;
   font-family: "Inter", Arial, sans-serif;
-  background-color: #fff;
-  color: #222;
+  background:
+    radial-gradient(circle at top left, rgba(255, 202, 40, 0.15), transparent 30%),
+    radial-gradient(circle at top right, rgba(59, 76, 202, 0.12), transparent 35%),
+    var(--color-background);
+  color: var(--color-text);
 }
 
 button,
@@ -23,4 +26,26 @@ input {
 
 img {
   max-width: 100%;
+}
+
+:root {
+  --color-primary: #ef5350;
+  --color-primary-dark: #c62828;
+
+  --color-secondary: #ffca28;
+  --color-accent: #3b4cca;
+
+  --color-background: #f6f7fb;
+  --color-surface: #ffffff;
+
+  --color-text: #202124;
+  --color-text-secondary: #6b7280;
+
+  --color-border: #e5e7eb;
+
+  --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.08);
+
+  --radius-small: 10px;
+  --radius-medium: 18px;
+  --radius-large: 28px;
 }

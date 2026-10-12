@@ -1,16 +1,28 @@
 .navigation {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 12px;
 }
 
 .navigation__link {
-  color: inherit;
+  padding: 10px 16px;
+
+  color: var(--color-text);
   text-decoration: none;
-  transition: opacity 0.2s ease;
+  font-weight: 500;
+
+  border-radius: var(--radius-small);
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .navigation__link:hover {
-  opacity: 0.6;
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  transform: translateY(-2px);
 }
 
 @media screen and (max-width: 600px) {
