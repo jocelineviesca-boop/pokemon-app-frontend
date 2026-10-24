@@ -1,0 +1,82 @@
+.favorites-page {
+  padding: 40px 20px;
+}
+
+.favorites-page__title {
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.favorites-page__list {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 24px;
+
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.favorites-page__card {
+  position: relative;
+
+  padding: 24px;
+
+  background-color: #fff;
+  border-radius: 16px;
+
+  text-align: center;
+}
+
+.favorites-page__image {
+  width: 150px;
+  height: 150px;
+
+  object-fit: contain;
+}
+
+.favorites-page__name {
+  text-transform: capitalize;
+}
+
+.favorites-page__type {
+  text-transform: capitalize;
+}
+
+.favorites-page__empty {
+  text-align: center;
+}
+
+.favorites-page__delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+
+  width: 32px;
+  height: 32px;
+
+  border: none;
+  border-radius: 50%;
+
+  background-color: transparent;
+
+  font-size: 24px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.favorites-page__delete:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  transform: scale(1.1);
+}
+
+@media screen and (max-width: 700px) {
+  .favorites-page__list {
+    grid-template-columns: 1fr;
+  }
+}

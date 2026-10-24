@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router-dom";
 
 import Header from "../Header/Header.jsx";
 import Main from "../Main/Main.jsx";
@@ -7,17 +11,26 @@ import About from "../About/About.jsx";
 import Footer from "../Footer/Footer.jsx";
 import SearchForm from "../SearchForm/SearchForm.jsx";
 import PokemonPage from "../PokemonPage/PokemonPage.jsx";
+import Register from "../Register/Register.jsx";
+import Login from "../Login/Login.jsx";
+import ProtectedRoute from "../ProtectedRoute/ProtectedRoute.jsx";
+import FavoritesPage from "../FavoritesPage/FavoritesPage.jsx";
+
+import CurrentUserContext from "../../contexts/CurrentUserContext.js";
+
+import {
+  register,
+  login,
+  getCurrentUser,
+  getFavorites,
+  addFavorite,
+  deleteFavorite,
+} from "../../utils/MainApi.js";
 
 import {
   getPokemon,
   getPokemonList,
 } from "../../utils/pokeApi.js";
-
-import {
-  getFavorites,
-  addFavorite,
-  removeFavorite,
-} from "../../utils/favoritesApi.js";
 
 import "./App.css";
 
@@ -25,7 +38,9 @@ function App() {
   const [pokemon, setPokemon] = useState(null);
 
   const [pokemonList, setPokemonList] = useState(() => {
-    const savedPokemon = localStorage.getItem("pokemonList");
+    const savedPokemon = localStorage.getItem(
+      "pokemonList"
+    );
 
     return savedPokemon
       ? JSON.parse(savedPokemon)
@@ -33,13 +48,32 @@ function App() {
   });
 
   const [favorites, setFavorites] = useState([]);
-  const [favoritesError, setFavoritesError] = useState("");
+  const [favoritesError, setFavoritesError] =
+    useState("");
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isListLoading, setIsListLoading] = useState(false);
+  const [isLoading, setIsLoading] =
+    useState(false);
+
+  const [isListLoading, setIsListLoading] =
+    useState(false);
+
+  const [currentUser, setCurrentUser] =
+    useState(null);
+
+  const [isLoggedIn, setIsLoggedIn] =
+    useState(false);
+
+  const [isRegisterOpen, setIsRegisterOpen] =
+    useState(false);
+
+  const [isLoginOpen, setIsLoginOpen] =
+    useState(false);
+
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] =
+    useState("");
 
   const navigate = useNavigate();
 
@@ -72,7 +106,18 @@ function App() {
   }, [pokemonList]);
 
   useEffect(() => {
-  getFavorites()
+  if (!isLoggedIn) {
+    setFavorites([]);
+    return;
+  }
+
+  const token = localStorage.getItem("jwt");
+
+  if (!token) {
+    return;
+  }
+
+  getFavorites(token)
     .then((data) => {
       setFavorites(data);
       setFavoritesError("");
@@ -84,6 +129,29 @@ function App() {
       );
 
       setFavoritesError("favorites-error");
+    });
+}, [isLoggedIn]);
+
+  useEffect(() => {
+  const token = localStorage.getItem("jwt");
+
+  if (!token) {
+    setIsAuthLoading(false);
+    return;
+  }
+
+  getCurrentUser(token)
+    .then((userData) => {
+      setCurrentUser(userData);
+      setIsLoggedIn(true);
+    })
+    .catch(() => {
+      localStorage.removeItem("jwt");
+      setCurrentUser(null);
+      setIsLoggedIn(false);
+    })
+    .finally(() => {
+      setIsAuthLoading(false);
     });
 }, []);
 
@@ -114,12 +182,21 @@ function App() {
   function handleAddFavorite(pokemon) {
   setFavoritesError("");
 
-  addFavorite(pokemon)
+  const token = localStorage.getItem("jwt");
+
+  if (!token) {
+    handleOpenLogin();
+    return Promise.resolve();
+  }
+
+  return addFavorite(pokemon, token)
     .then((savedPokemon) => {
-      setFavorites((currentFavorites) => [
-        ...currentFavorites,
-        savedPokemon,
-      ]);
+      setFavorites(
+        (currentFavorites) => [
+          ...currentFavorites,
+          savedPokemon,
+        ]
+      );
     })
     .catch((error) => {
       console.error(
@@ -131,16 +208,24 @@ function App() {
     });
 }
 
-  function handleRemoveFavorite(favoriteId) {
+ function handleRemoveFavorite(favoriteId) {
   setFavoritesError("");
 
-  removeFavorite(favoriteId)
+  const token = localStorage.getItem("jwt");
+
+  if (!token) {
+    handleOpenLogin();
+    return Promise.resolve();
+  }
+
+  return deleteFavorite(favoriteId, token)
     .then(() => {
-      setFavorites((currentFavorites) =>
-        currentFavorites.filter(
-          (favorite) =>
-            favorite.id !== favoriteId
-        )
+      setFavorites(
+        (currentFavorites) =>
+          currentFavorites.filter(
+            (favorite) =>
+              favorite._id !== favoriteId
+          )
       );
     })
     .catch((error) => {
@@ -153,49 +238,177 @@ function App() {
     });
 }
 
+  function handleRegister({
+  email,
+  password,
+  name,
+}) {
+  return register({
+    email,
+    password,
+    name,
+  })
+    .then(() => {
+      return login({
+        email,
+        password,
+      });
+    })
+    .then((data) => {
+      localStorage.setItem(
+        "jwt",
+        data.token
+      );
+
+      return getCurrentUser(data.token);
+    })
+    .then((userData) => {
+      setCurrentUser(userData);
+      setIsLoggedIn(true);
+      setIsRegisterOpen(false);
+    });
+}
+
+  function handleLogin({
+    email,
+    password,
+  }) {
+    return login({
+      email,
+      password,
+    })
+      .then((data) => {
+        localStorage.setItem(
+          "jwt",
+          data.token
+        );
+
+        return getCurrentUser(data.token);
+      })
+      .then((userData) => {
+        setCurrentUser(userData);
+        setIsLoggedIn(true);
+        setIsLoginOpen(false);
+      });
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("jwt");
+
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+    setFavorites([]);
+
+    navigate("/");
+  }
+
+  function handleOpenLogin() {
+    setIsRegisterOpen(false);
+    setIsLoginOpen(true);
+  }
+
+  function handleOpenRegister() {
+    setIsLoginOpen(false);
+    setIsRegisterOpen(true);
+  }
+
+  function handleCloseLogin() {
+    setIsLoginOpen(false);
+  }
+
+  function handleCloseRegister() {
+    setIsRegisterOpen(false);
+  }
+
   return (
-    <div className="app">
-      <Header />
-
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Main />
-
-              <SearchForm
-                onSearch={handleSearch}
-                isLoading={isLoading}
-              />
-
-              <About />
-            </>
-          }
+    <CurrentUserContext.Provider
+      value={currentUser}
+    >
+      <div className="app">
+        <Header
+          isLoggedIn={isLoggedIn}
+          onLoginClick={handleOpenLogin}
+          onLogout={handleLogout}
         />
 
-        <Route
-          path="/pokemon"
-          element={
-            <PokemonPage
-  pokemon={pokemon}
-  pokemonList={pokemonList}
-  favorites={favorites}
-  favoritesError={favoritesError}
-  isLoading={isLoading}
-  isListLoading={isListLoading}
-  error={error}
-  onSearch={handleSearch}
-  onAddFavorite={handleAddFavorite}
-  onRemoveFavorite={handleRemoveFavorite}
-  searchTerm={searchTerm}
+        <Routes>
+  <Route
+    path="/"
+    element={
+      <>
+        <Main />
+
+        <SearchForm
+          onSearch={handleSearch}
+          isLoading={isLoading}
+        />
+
+        <About />
+      </>
+    }
+  />
+
+  <Route
+    path="/pokemon"
+    element={
+      <PokemonPage
+        pokemon={pokemon}
+        pokemonList={pokemonList}
+        favorites={favorites}
+        favoritesError={favoritesError}
+        isLoading={isLoading}
+        isListLoading={isListLoading}
+        error={error}
+        onSearch={handleSearch}
+        onAddFavorite={handleAddFavorite}
+        onRemoveFavorite={handleRemoveFavorite}
+        searchTerm={searchTerm}
+      />
+    }
+  />
+
+  <Route
+  path="/favorites"
+  element={
+    <ProtectedRoute
+      isLoggedIn={isLoggedIn}
+      isAuthLoading={isAuthLoading}
+      onUnauthorized={handleOpenLogin}
+    >
+      <FavoritesPage
+        favorites={favorites}
+        onRemoveFavorite={handleRemoveFavorite}
+      />
+    </ProtectedRoute>
+  }
 />
-          }
-        />
-      </Routes>
+</Routes>
 
-      <Footer />
-    </div>
+        {isRegisterOpen && (
+          <Register
+            onRegister={handleRegister}
+            onSwitchToLogin={
+              handleOpenLogin
+            }
+            onClose={
+              handleCloseRegister
+            }
+          />
+        )}
+
+        {isLoginOpen && (
+          <Login
+            onLogin={handleLogin}
+            onSwitchToRegister={
+              handleOpenRegister
+            }
+            onClose={handleCloseLogin}
+          />
+        )}
+
+        <Footer />
+      </div>
+    </CurrentUserContext.Provider>
   );
 }
 
