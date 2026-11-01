@@ -1,4 +1,6 @@
-const BASE_URL = "https://pokemon-api.happyminecraft.org";
+import {
+  MAIN_API_BASE_URL,
+} from "./constants.js";
 
 function checkResponse(response) {
   if (response.ok) {
@@ -21,7 +23,7 @@ export function register({
   password,
   name,
 }) {
-  return fetch(`${BASE_URL}/signup`, {
+  return fetch(`${MAIN_API_BASE_URL}/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -38,7 +40,7 @@ export function login({
   email,
   password,
 }) {
-  return fetch(`${BASE_URL}/signin`, {
+  return fetch(`${MAIN_API_BASE_URL}/signin`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +53,7 @@ export function login({
 }
 
 export function getCurrentUser(token) {
-  return fetch(`${BASE_URL}/users/me`, {
+  return fetch(`${MAIN_API_BASE_URL}/users/me`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -59,7 +61,7 @@ export function getCurrentUser(token) {
 }
 
 export function getFavorites(token) {
-  return fetch(`${BASE_URL}/favorites`, {
+  return fetch(`${MAIN_API_BASE_URL}/favorites`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -67,7 +69,7 @@ export function getFavorites(token) {
 }
 
 export function addFavorite(pokemon, token) {
-  return fetch(`${BASE_URL}/favorites`, {
+  return fetch(`${MAIN_API_BASE_URL}/favorites`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -86,8 +88,7 @@ export function deleteFavorite(
   favoriteId,
   token
 ) {
-  return fetch(
-    `${BASE_URL}/favorites/${favoriteId}`,
+  return fetch(`${MAIN_API_BASE_URL}/favorites/${favoriteId}`,
     {
       method: "DELETE",
       headers: {

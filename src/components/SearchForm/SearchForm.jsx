@@ -38,6 +38,7 @@ function SearchForm({ onSearch, isLoading }) {
         placeholder="Busca un Pokémon"
         value={query}
         onChange={handleChange}
+        required
       />
 
       <button

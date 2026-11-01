@@ -54,6 +54,11 @@
   font-size: 16px;
 }
 
+.login__input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .login__button {
   padding: 12px;
 

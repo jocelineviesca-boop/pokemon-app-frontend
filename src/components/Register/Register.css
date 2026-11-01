@@ -54,6 +54,11 @@
   font-size: 16px;
 }
 
+.register__input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
 .register__button {
   padding: 12px;
 

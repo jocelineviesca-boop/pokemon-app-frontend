@@ -32,20 +32,15 @@ import {
   getPokemonList,
 } from "../../utils/pokeApi.js";
 
-import "./App.css";
+import {
+  JWT_KEY,
+  INITIAL_POKEMON_LIMIT,
+} from "../../utils/constants.js";
 
 function App() {
   const [pokemon, setPokemon] = useState(null);
 
-  const [pokemonList, setPokemonList] = useState(() => {
-    const savedPokemon = localStorage.getItem(
-      "pokemonList"
-    );
-
-    return savedPokemon
-      ? JSON.parse(savedPokemon)
-      : [];
-  });
+  const [pokemonList, setPokemonList] = useState([]);
 
   const [favorites, setFavorites] = useState([]);
   const [favoritesError, setFavoritesError] =
@@ -63,28 +58,26 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] =
     useState(false);
 
+  const [isAuthLoading, setIsAuthLoading] =
+    useState(true);
+
   const [isRegisterOpen, setIsRegisterOpen] =
     useState(false);
 
   const [isLoginOpen, setIsLoginOpen] =
     useState(false);
 
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
-
   const [error, setError] = useState("");
+
   const [searchTerm, setSearchTerm] =
     useState("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (pokemonList.length > 0) {
-      return;
-    }
-
     setIsListLoading(true);
 
-    getPokemonList()
+    getPokemonList(INITIAL_POKEMON_LIMIT)
       .then((data) => {
         setPokemonList(data);
       })
@@ -97,63 +90,54 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (pokemonList.length > 0) {
-      localStorage.setItem(
-        "pokemonList",
-        JSON.stringify(pokemonList)
-      );
-    }
-  }, [pokemonList]);
+    const token = localStorage.getItem(JWT_KEY);
 
-  useEffect(() => {
-  if (!isLoggedIn) {
-    setFavorites([]);
-    return;
-  }
-
-  const token = localStorage.getItem("jwt");
-
-  if (!token) {
-    return;
-  }
-
-  getFavorites(token)
-    .then((data) => {
-      setFavorites(data);
-      setFavoritesError("");
-    })
-    .catch((error) => {
-      console.error(
-        "Error al cargar favoritos:",
-        error
-      );
-
-      setFavoritesError("favorites-error");
-    });
-}, [isLoggedIn]);
-
-  useEffect(() => {
-  const token = localStorage.getItem("jwt");
-
-  if (!token) {
-    setIsAuthLoading(false);
-    return;
-  }
-
-  getCurrentUser(token)
-    .then((userData) => {
-      setCurrentUser(userData);
-      setIsLoggedIn(true);
-    })
-    .catch(() => {
-      localStorage.removeItem("jwt");
-      setCurrentUser(null);
-      setIsLoggedIn(false);
-    })
-    .finally(() => {
+    if (!token) {
       setIsAuthLoading(false);
-    });
-}, []);
+      return;
+    }
+
+    getCurrentUser(token)
+      .then((userData) => {
+        setCurrentUser(userData);
+        setIsLoggedIn(true);
+      })
+      .catch(() => {
+        localStorage.removeItem(JWT_KEY);
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+      })
+      .finally(() => {
+        setIsAuthLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setFavorites([]);
+      return;
+    }
+
+    const token = localStorage.getItem(JWT_KEY);
+
+    if (!token) {
+      return;
+    }
+
+    getFavorites(token)
+      .then((data) => {
+        setFavorites(data);
+        setFavoritesError("");
+      })
+      .catch((favoritesRequestError) => {
+        console.error(
+          "Error al cargar favoritos:",
+          favoritesRequestError
+        );
+
+        setFavoritesError("favorites-error");
+      });
+  }, [isLoggedIn]);
 
   function handleSearch(query) {
     setSearchTerm(query);
@@ -167,8 +151,8 @@ function App() {
       .then((data) => {
         setPokemon(data);
       })
-      .catch((error) => {
-        if (error.message === "NOT_FOUND") {
+      .catch((searchError) => {
+        if (searchError.message === "NOT_FOUND") {
           setError("not-found");
         } else {
           setError("api-error");
@@ -179,95 +163,92 @@ function App() {
       });
   }
 
-  function handleAddFavorite(pokemon) {
-  setFavoritesError("");
+  function handleAddFavorite(pokemonToSave) {
+    setFavoritesError("");
 
-  const token = localStorage.getItem("jwt");
+    const token = localStorage.getItem(JWT_KEY);
 
-  if (!token) {
-    handleOpenLogin();
-    return Promise.resolve();
-  }
+    if (!token) {
+      handleOpenLogin();
+      return Promise.resolve();
+    }
 
-  return addFavorite(pokemon, token)
-    .then((savedPokemon) => {
-      setFavorites(
-        (currentFavorites) => [
+    return addFavorite(pokemonToSave, token)
+      .then((savedPokemon) => {
+        setFavorites((currentFavorites) => [
           ...currentFavorites,
           savedPokemon,
-        ]
-      );
-    })
-    .catch((error) => {
-      console.error(
-        "Error al guardar favorito:",
-        error
-      );
+        ]);
+      })
+      .catch((favoriteError) => {
+        console.error(
+          "Error al guardar favorito:",
+          favoriteError
+        );
 
-      setFavoritesError("favorites-error");
-    });
-}
-
- function handleRemoveFavorite(favoriteId) {
-  setFavoritesError("");
-
-  const token = localStorage.getItem("jwt");
-
-  if (!token) {
-    handleOpenLogin();
-    return Promise.resolve();
+        setFavoritesError("favorites-error");
+      });
   }
 
-  return deleteFavorite(favoriteId, token)
-    .then(() => {
-      setFavorites(
-        (currentFavorites) =>
+  function handleRemoveFavorite(favoriteId) {
+    setFavoritesError("");
+
+    const token = localStorage.getItem(JWT_KEY);
+
+    if (!token) {
+      handleOpenLogin();
+      return Promise.resolve();
+    }
+
+    return deleteFavorite(favoriteId, token)
+      .then(() => {
+        setFavorites((currentFavorites) =>
           currentFavorites.filter(
             (favorite) =>
               favorite._id !== favoriteId
           )
-      );
-    })
-    .catch((error) => {
-      console.error(
-        "Error al eliminar favorito:",
-        error
-      );
+        );
+      })
+      .catch((favoriteError) => {
+        console.error(
+          "Error al eliminar favorito:",
+          favoriteError
+        );
 
-      setFavoritesError("favorites-error");
-    });
-}
+        setFavoritesError("favorites-error");
+      });
+  }
 
   function handleRegister({
-  email,
-  password,
-  name,
-}) {
-  return register({
     email,
     password,
     name,
-  })
-    .then(() => {
-      return login({
-        email,
-        password,
-      });
+  }) {
+    return register({
+      email,
+      password,
+      name,
     })
-    .then((data) => {
-      localStorage.setItem(
-        "jwt",
-        data.token
-      );
+      .then(() => {
+        return login({
+          email,
+          password,
+        });
+      })
+      .then((data) => {
+        localStorage.setItem(
+          JWT_KEY,
+          data.token
+        );
 
-      return getCurrentUser(data.token);
-    })
-    .then((userData) => {
-      setCurrentUser(userData);
-      setIsLoggedIn(true);
-      setIsRegisterOpen(false);
-    });
-}
+        return getCurrentUser(data.token);
+      })
+      .then((userData) => {
+        setCurrentUser(userData);
+        setIsLoggedIn(true);
+        setIsRegisterOpen(false);
+      });
+  }
 
   function handleLogin({
     email,
@@ -279,7 +260,7 @@ function App() {
     })
       .then((data) => {
         localStorage.setItem(
-          "jwt",
+          JWT_KEY,
           data.token
         );
 
@@ -293,7 +274,7 @@ function App() {
   }
 
   function handleLogout() {
-    localStorage.removeItem("jwt");
+    localStorage.removeItem(JWT_KEY);
 
     setCurrentUser(null);
     setIsLoggedIn(false);
@@ -332,57 +313,71 @@ function App() {
         />
 
         <Routes>
-  <Route
-    path="/"
-    element={
-      <>
-        <Main />
+          <Route
+            path="/"
+            element={
+              <main>
+                <Main />
 
-        <SearchForm
-          onSearch={handleSearch}
-          isLoading={isLoading}
-        />
+                <SearchForm
+                  onSearch={handleSearch}
+                  isLoading={isLoading}
+                />
 
-        <About />
-      </>
-    }
-  />
+                <About />
+              </main>
+            }
+          />
 
-  <Route
-    path="/pokemon"
-    element={
-      <PokemonPage
-        pokemon={pokemon}
-        pokemonList={pokemonList}
-        favorites={favorites}
-        favoritesError={favoritesError}
-        isLoading={isLoading}
-        isListLoading={isListLoading}
-        error={error}
-        onSearch={handleSearch}
-        onAddFavorite={handleAddFavorite}
-        onRemoveFavorite={handleRemoveFavorite}
-        searchTerm={searchTerm}
-      />
-    }
-  />
+          <Route
+            path="/pokemon"
+            element={
+              <PokemonPage
+                pokemon={pokemon}
+                pokemonList={pokemonList}
+                favorites={favorites}
+                favoritesError={
+                  favoritesError
+                }
+                isLoading={isLoading}
+                isListLoading={
+                  isListLoading
+                }
+                error={error}
+                onSearch={handleSearch}
+                onAddFavorite={
+                  handleAddFavorite
+                }
+                onRemoveFavorite={
+                  handleRemoveFavorite
+                }
+                searchTerm={searchTerm}
+              />
+            }
+          />
 
-  <Route
-  path="/favorites"
-  element={
-    <ProtectedRoute
-      isLoggedIn={isLoggedIn}
-      isAuthLoading={isAuthLoading}
-      onUnauthorized={handleOpenLogin}
-    >
-      <FavoritesPage
-        favorites={favorites}
-        onRemoveFavorite={handleRemoveFavorite}
-      />
-    </ProtectedRoute>
-  }
-/>
-</Routes>
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute
+                isLoggedIn={isLoggedIn}
+                isAuthLoading={
+                  isAuthLoading
+                }
+                onUnauthorized={
+                  handleOpenLogin
+                }
+              >
+                <FavoritesPage
+                  favorites={favorites}
+                  onRemoveFavorite={
+                    handleRemoveFavorite
+                  }
+                />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
 
         {isRegisterOpen && (
           <Register

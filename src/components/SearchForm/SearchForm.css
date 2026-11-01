@@ -21,7 +21,11 @@
   border: none;
   border-radius: var(--radius-large);
 
-  outline: none;
+}
+
+.search-form__input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .search-form__input::placeholder {

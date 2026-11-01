@@ -2,7 +2,7 @@ import "./Main.css";
 
 function Main() {
   return (
-    <main className="main">
+    <section className="main">
       <section className="main__intro">
         <h2 className="main__title">
           Explora el mundo Pokémon
@@ -12,7 +12,7 @@ function Main() {
           Busca un Pokémon y consulta su información obtenida desde PokéAPI.
         </p>
       </section>
-    </main>
+    </section>
   );
 }
 

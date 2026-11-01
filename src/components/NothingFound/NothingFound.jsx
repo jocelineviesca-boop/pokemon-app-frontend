@@ -4,7 +4,7 @@ function NothingFound() {
   return (
     <section className="nothing-found">
       <h2 className="nothing-found__title">
-        No se encontró ningún Pokémon
+        No se ha encontrado nada
       </h2>
 
       <p className="nothing-found__text">

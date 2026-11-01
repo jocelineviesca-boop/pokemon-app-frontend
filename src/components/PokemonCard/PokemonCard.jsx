@@ -21,7 +21,7 @@ function PokemonCard({
 
   function handleFavoriteClick() {
     if (isFavorite) {
-      onRemoveFavorite(favoritePokemon.id);
+      onRemoveFavorite(favoritePokemon._id);
     } else {
       onAddFavorite(pokemon);
     }

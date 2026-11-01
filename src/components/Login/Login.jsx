@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Login.css";
 
 function Login({
@@ -91,6 +91,20 @@ function Login({
       onClose();
     }
   }
+
+  useEffect(() => {
+  function handleEsc(event) {
+    if (event.key === "Escape") {
+      onClose();
+    }
+  }
+
+  document.addEventListener("keydown", handleEsc);
+
+  return () => {
+    document.removeEventListener("keydown", handleEsc);
+  };
+}, [onClose]);
 
   return (
     <div
